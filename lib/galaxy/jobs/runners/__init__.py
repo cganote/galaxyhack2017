@@ -302,8 +302,10 @@ class BaseJobRunner( object ):
         env_setup_commands.append( job_wrapper.get_env_setup_clause() or '' )
         destination = job_wrapper.job_destination or {}
         envs = destination.get( "env", [] )
+        local_disk_working_dir= destination.get( "local_disk_working_dir", "None" )
         envs.extend( job_wrapper.environment_variables )
         for env in envs:
+            log.debug( 'env is %s' % env)
             env_setup_commands.append( env_to_statement( env ) )
         command_line = job_wrapper.runner_command_line
         options = dict(
@@ -313,6 +315,7 @@ class BaseJobRunner( object ):
             env_setup_commands=env_setup_commands,
             working_directory=os.path.abspath( job_wrapper.working_directory ),
             command=command_line,
+            localcwd=local_disk_working_dir,
             shell=job_wrapper.shell,
             preserve_python_environment=job_wrapper.tool.requires_galaxy_python_environment,
         )

@@ -20,8 +20,21 @@ if [ "$GALAXY_VIRTUAL_ENV" != "None" -a -z "$VIRTUAL_ENV" \
      -a -f "$GALAXY_VIRTUAL_ENV/bin/activate" -a "$PRESERVE_GALAXY_ENVIRONMENT" = "True" ]; then
     . "$GALAXY_VIRTUAL_ENV/bin/activate"
 fi
+
 $instrument_pre_commands
-cd $working_directory
-$command
-echo $? > $exit_code_path
+LOCALCWD="$localcwd"
+if ["$LOCALCWD" != "None"]; then
+    mkdir -p $LOCALCWD
+    cd $LOCALCWD
+    $command
+    EXIT=$?
+    echo $EXIT > $exit_code_path
+    if [ $EXIT == 0 ]; then
+	cp -r ${LOCALCWD}/* $working_directory
+    fi
+else
+    cd $working_directory
+    $command
+    echo $? > $exit_code_path
+fi
 $instrument_post_commands

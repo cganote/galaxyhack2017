@@ -62,6 +62,7 @@ class JobDestination( Bunch ):
         self['converted'] = False
         self['shell'] = None
         self['env'] = []
+        self['local_disk_work_dir'] = None
         self['resubmit'] = []
         # dict is appropriate (rather than a bunch) since keys may not be valid as attributes
         self['params'] = dict()
@@ -241,6 +242,7 @@ class JobConfiguration( object ):
             job_destination = JobDestination(**dict(destination.items()))
             job_destination['params'] = self.__get_params(destination)
             job_destination['env'] = self.__get_envs(destination)
+            job_destination['local_disk_working_dir'] = self.__get_local_disk_working_dir(destination)
             destination_resubmits = self.__get_resubmits(destination)
             if destination_resubmits:
                 resubmits = destination_resubmits
@@ -537,6 +539,21 @@ class JobConfiguration( object ):
                 execute=param.get('exec'),
                 value=param.text,
                 raw=util.asbool(param.get('raw', 'false'))
+            ) )
+        return rval
+
+    def __get_local_disk_working_dir(self, parent):
+        """Parses any child <local_disk_working_dir> tags in to a dictionary suitable for persistence.
+
+        :param parent: Parent element in which to find child <local_disk_working_dir> tags.
+        :type parent: ``xml.etree.ElementTree.Element``
+
+        :returns: dict
+        """
+        rval = []
+        for param in parent.findall('local_disk_working_dir'):
+            rval.append( dict(
+                path=param.get('path')
             ) )
         return rval
 
